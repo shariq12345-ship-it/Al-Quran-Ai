@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ur" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Islamic AI Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- html2pdf.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+
+    <!-- ================= HEADER ================= -->
+    <header class="navbar">
+        <div class="logo-container">
+            <img src="./content/al-quran-logo-islamic-logo-illustration-and-book-logo-vector-removebg-preview.png"
+                alt="Golden Quran Logo" class="quran-logo">
+            <span class="logo-text">Al-Quran AI</span>
+        </div>
+
+        <div class="nav-actions">
+            <button id="viewBookmarksBtn" class="mode-btn" title="View Bookmarks">
+                <i class="fa-solid fa-bookmark"></i> (<span id="bookmarkCount">0</span>)
+            </button>
+            <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+
+            <!-- Dynamic Login / Profile Container -->
+            <div id="userNavContainer">
+                <button class="login-btn" id="openLoginModal"><i class="fa-solid fa-user"></i> Login</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <main class="main-container">
+
+        <!-- Hero Title -->
+        <h1 class="main-title">Islamic AI Assistant</h1>
+        <p class="sub-title">Search Quranic Surahs, Translations & AI Insights</p>
+
+        <!-- Search Section -->
+        <div class="search-box-wrapper">
+            <div class="search-input-container">
+                <input type="text" id="searchInput"
+                    placeholder="Search Surah name, Ayah (e.g., Yaseen, 2:255) or ask AI..." />
+                <button class="icon-btn voice-btn" id="voiceSearchBtn" title="Voice Search (Urdu/English/Arabic)">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+                <button class="icon-btn submit-btn" id="searchBtn" title="Submit Search">
+                    <i class="fa-solid fa-arrow-up"></i>
+                </button>
+            </div>
+
+            <!-- Mode Selector Buttons -->
+            <div class="mode-buttons">
+                <button class="mode-btn active" id="modeNormal" data-mode="normal" title="Only Arabic Quran View">
+                    Normal (Arabic Only)
+                </button>
+                <button class="mode-btn" id="modeUrdu" data-mode="urdu" title="Arabic with Urdu Translation">
+                    Urdu Translator
+                </button>
+                <button class="mode-btn" id="modeAI" data-mode="ai" title="Ask anything about Quran or Islamic Knowledge">
+                    AI Chatbot
+                </button>
+            </div>
+        </div>
+
+        <!-- Master Audio Player -->
+        <div class="master-audio-card hidden" id="masterAudioCard">
+            <div class="audio-info">
+                <h3 id="currentSurahTitle">Surah Name</h3>
+                <p>Full Surah Recitation</p>
+            </div>
+            <div class="audio-controls">
+                <button id="masterPlayBtn" class="control-btn" title="Play whole Surah"><i class="fa-solid fa-play"></i> Play All</button>
+                <button id="masterMuteBtn" class="control-btn" title="Mute Audio"><i class="fa-solid fa-volume-high"></i> Mute</button>
+                <button id="downloadPdfBtn" class="control-btn pdf-btn" title="Download As a PDF"><i class="fa-solid fa-file-pdf"></i> Download
+                    PDF</button>
+            </div>
+            <audio id="globalAudioPlayer"></audio>
+        </div>
+
+        <!-- Quran Viewport -->
+        <div class="document-page-container" id="pdfDocumentArea" title="Click for Fullscreen View">
+            <div class="page-placeholder" id="placeholderText">
+                <i class="fa-solid fa-book-open placeholder-icon"></i>
+                <p>Search any Surah or ask a question to generate Quran Document Page.</p>
+            </div>
+            <div class="ayah-list" id="ayahContainer"></div>
+        </div>
+
+    </main>
+
+    <!-- ================= ATTRACTIVE LOGIN MODAL ================= -->
+    <div class="modal-overlay hidden" id="loginModal">
+        <div class="modal-card">
+            <button class="close-modal-btn" id="closeLoginModal">&times;</button>
+            <div class="modal-header">
+                <i class="fa-solid fa-user-lock modal-icon"></i>
+                <h2>Welcome Back</h2>
+                <p>Login to save bookmarks and preferences</p>
+            </div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email"><i class="fa-solid fa-envelope"></i> Email</label>
+                    <input type="email" id="email" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
+                    <input type="password" id="password" placeholder="Enter password" required>
+                </div>
+                <button type="submit" class="submit-login-btn">Login Now</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= USER PROFILE MODAL ================= -->
+    <div class="modal-overlay hidden" id="profileModal">
+        <div class="modal-card profile-card">
+            <button class="close-modal-btn" id="closeProfileModal">&times;</button>
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+                <h2 id="profileName">User Name</h2>
+                <p id="profileEmail">user@example.com</p>
+            </div>
+            <div class="profile-body">
+                <div class="profile-info-item">
+                    <span><i class="fa-solid fa-shield-halved"></i> Account Status</span>
+                    <strong style="color: #27ae60;">Active</strong>
+                </div>
+            </div>
+            <button id="logoutBtn" class="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>
