@@ -303,9 +303,7 @@ if (logoutBtn) {
 function updateSearchPlaceholder() {
   if (!searchInput) return;
 
-  if (currentMode === 'ai') {
-    searchInput.placeholder = "Ask any Islamic question to get instant AI-guided answers...";
-  } else if (currentMode === 'urdu') {
+  if (currentMode === 'urdu') {
     searchInput.placeholder = "Search Surah or Ayah to read & listen with Urdu translation...";
   } else {
     searchInput.placeholder = "Enter Surah name or Ayah number to read & listen with Arabic...";
@@ -340,17 +338,10 @@ async function handleSearch() {
   if (placeholderText) placeholderText.classList.add('hidden');
   stopAudio();
 
-  if (currentMode === 'ai') {
-    if (ayahContainer) {
-      ayahContainer.innerHTML = '<p style="text-align:center; padding: 30px; color: var(--dark-yellow);"> AI is thinking...</p>';
-    }
-    await fetchAIChatbotResponse(query);
-  } else {
-    if (ayahContainer) {
-      ayahContainer.innerHTML = '<p style="text-align:center; padding: 30px; color: var(--dark-yellow);">⏳ Loading Quran Data...</p>';
-    }
-    await fetchQuranData(query);
+  if (ayahContainer) {
+    ayahContainer.innerHTML = '<p style="text-align:center; padding: 30px; color: var(--dark-yellow);">⏳ Loading Quran Data...</p>';
   }
+  await fetchQuranData(query);
 }
 
 // ================= SURAH & AYAH SEARCH HELPER =================
@@ -643,47 +634,6 @@ function renderQuranPage(arabicData, urduData, arabicAudioData, urduAudioData, t
     setTimeout(() => {
       highlightAyahCard(targetCardElementId);
     }, 100);
-  }
-}
-
-// ================= AI CHATBOT MODE =================
-async function fetchAIChatbotResponse(prompt) {
-  if (masterAudioCard) masterAudioCard.classList.add('hidden');
-
-  try {
-    // Purani Groq Direct Call aur Key yahan se hat gayi hai
-    // Ab Vercel Serverless Function (/api/chat) call hoga:
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ prompt: prompt })
-    });
-
-    const data = await response.json();
-
-    if (data.choices && data.choices.length > 0) {
-      const aiReply = data.choices[0].message.content.replace(/\n/g, '<br>');
-      if (ayahContainer) {
-        ayahContainer.innerHTML = `
-          <div class="ayah-card" style="text-align:left; direction:ltr; line-height: 1.8;">
-            <h3 style="color: var(--primary-gold, #f1c40f); margin-bottom: 12px;"> Islamic AI Assistant Response:</h3>
-            <div style="font-size: 1.05rem; color: var(--text-color);">${aiReply}</div>
-          </div>`;
-      }
-    } else {
-      throw new Error("No response from AI");
-    }
-
-  } catch (error) {
-    console.error("AI Error:", error);
-    if (ayahContainer) {
-      ayahContainer.innerHTML = `
-        <div class="ayah-card" style="text-align:center;">
-          <p style="color: #ff4d4d;">❌ Error generating response. Please check your server or connection.</p>
-        </div>`;
-    }
   }
 }
 

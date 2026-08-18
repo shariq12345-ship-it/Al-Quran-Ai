@@ -463,14 +463,6 @@ header, nav, .navbar {
   border-color: #f1c40f !important;
 }
 
-/* AI Response Card Styling */
-.ai-response-card, 
-.ai-response-content,
-.ai-response-card p {
-  color: var(--text-primary) !important;
-  transition: color 0.3s ease;
-}
-
 .fullscreen-mode {
   position: fixed;
   top: 0;
