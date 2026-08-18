@@ -4,6 +4,7 @@ let currentAyahAudios = [];
 let currentAyahIndex = 0;
 let isPlayingAll = false;
 
+
 // DOM Elements
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
