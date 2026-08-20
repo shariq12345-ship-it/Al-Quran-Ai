@@ -23,7 +23,7 @@
         </div>
 
         <div class="nav-actions">
-            <button id="viewBookmarksBtn" class="mode-btn" title="View Bookmarks">
+            <button id="viewBookmarksBtn" class="mode-btn">
                 <i class="fa-solid fa-bookmark"></i> (<span id="bookmarkCount">0</span>)
             </button>
             <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">
@@ -59,11 +59,14 @@
 
             <!-- Mode Selector Buttons -->
             <div class="mode-buttons">
-                <button class="mode-btn active" id="modeNormal" data-mode="normal" title="Only Arabic Quran View">
+                <button class="mode-btn active" id="modeNormal" data-mode="normal">
                     Normal (Arabic Only)
                 </button>
-                <button class="mode-btn" id="modeUrdu" data-mode="urdu" title="Arabic with Urdu Translation">
+                <button class="mode-btn" id="modeUrdu" data-mode="urdu">
                     Urdu Translator
+                </button>
+                <button class="mode-btn" id="modeAI" data-mode="ai">
+                    AI Chatbot
                 </button>
             </div>
         </div>
@@ -75,9 +78,9 @@
                 <p>Full Surah Recitation</p>
             </div>
             <div class="audio-controls">
-                <button id="masterPlayBtn" class="control-btn" title="Play whole Surah"><i class="fa-solid fa-play"></i> Play All</button>
-                <button id="masterMuteBtn" class="control-btn" title="Mute Audio"><i class="fa-solid fa-volume-high"></i> Mute</button>
-                <button id="downloadPdfBtn" class="control-btn pdf-btn" title="Download As a PDF"><i class="fa-solid fa-file-pdf"></i> Download
+                <button id="masterPlayBtn" class="control-btn"><i class="fa-solid fa-play"></i> Play All</button>
+                <button id="masterMuteBtn" class="control-btn"><i class="fa-solid fa-volume-high"></i> Mute</button>
+                <button id="downloadPdfBtn" class="control-btn pdf-btn"><i class="fa-solid fa-file-pdf"></i> Download
                     PDF</button>
             </div>
             <audio id="globalAudioPlayer"></audio>

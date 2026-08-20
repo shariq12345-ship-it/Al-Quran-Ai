@@ -45,7 +45,6 @@ body.dark-theme,
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -463,6 +462,14 @@ header, nav, .navbar {
   border-color: #f1c40f !important;
 }
 
+/* AI Response Card Styling */
+.ai-response-card, 
+.ai-response-content,
+.ai-response-card p {
+  color: var(--text-primary) !important;
+  transition: color 0.3s ease;
+}
+
 .fullscreen-mode {
   position: fixed;
   top: 0;
@@ -823,4 +830,44 @@ header, nav, .navbar {
   #viewBookmarksBtn {
     padding: 6px 8px !important;
   }
+}
+/* ================= AI RESPONSE CARD THEME FIX ================= */
+
+/* AI Response Container Text Color */
+.ai-response-card, 
+.ai-response-content,
+.ai-response-card p {
+  color: var(--text-color, #ffffff) !important; /* CSS Variable se dynamic color lega */
+  transition: color 0.3s ease;
+}
+
+/* ☀️ LIGHT THEME OVERRIDES */
+body.light-theme,
+[data-theme="light"] {
+  --text-color: #1a1d20; /* Light theme par dark text */
+  --bg-card: #ffffff;
+  --border-color: #e0e0e0;
+}
+
+/* Light mode specific force fix for AI response block */
+body.light-theme .ai-response-card,
+body.light-theme .ai-response-content,
+body.light-theme .ai-response-card p,
+[data-theme="light"] .ai-response-card,
+[data-theme="light"] .ai-response-card p {
+  color: #1a1d20 !important; /* White background par visible text */
+}
+
+/* 🌙 DARK THEME OVERRIDES */
+body.dark-theme,
+[data-theme="dark"] {
+  --text-color: #f1f5f9; /* Dark theme par light text */
+}
+
+body.dark-theme .ai-response-card,
+body.dark-theme .ai-response-content,
+body.dark-theme .ai-response-card p,
+[data-theme="dark"] .ai-response-card,
+[data-theme="dark"] .ai-response-card p {
+  color: #f1f5f9 !important;
 }

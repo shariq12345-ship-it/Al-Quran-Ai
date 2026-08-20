@@ -1,9 +1,8 @@
 // ================= GLOBAL VARIABLES & STATE =================
-let currentMode = 'normal'; 
+let currentMode = 'normal';
 let currentAyahAudios = [];
 let currentAyahIndex = 0;
 let isPlayingAll = false;
-
 
 // DOM Elements
 const searchInput = document.getElementById('searchInput');
@@ -87,12 +86,12 @@ function toggleBookmark(ayahData) {
 
   localStorage.setItem('quranBookmarks', JSON.stringify(bookmarks));
   updateBookmarkBadge();
-  
+
   const btn = document.getElementById(`bm-btn-${ayahData.key.replace(/[:]/g, '-')}`);
   if (btn) {
     const isSaved = bookmarks.some(b => b.key === ayahData.key);
     btn.classList.toggle('bookmarked', isSaved);
-    btn.innerHTML = isSaved 
+    btn.innerHTML = isSaved
       ? `<i class="fa-solid fa-bookmark"></i> Bookmarked`
       : `<i class="fa-regular fa-bookmark"></i> Bookmark`;
   }
@@ -124,7 +123,7 @@ function toggleSurahBookmark(surahData) {
   if (surahBmBtn) {
     const isSaved = bookmarks.some(b => b.key === surahKey);
     surahBmBtn.classList.toggle('bookmarked', isSaved);
-    surahBmBtn.innerHTML = isSaved 
+    surahBmBtn.innerHTML = isSaved
       ? `<i class="fa-solid fa-bookmark"></i> Surah Bookmarked`
       : `<i class="fa-regular fa-bookmark"></i> Bookmark Surah`;
   }
@@ -149,11 +148,11 @@ function renderBookmarksView() {
 
   const titleHeader = document.createElement('div');
   titleHeader.className = 'bookmark-header-title';
-  
+
   titleHeader.innerHTML = `
     <h3 class="bookmark-heading">
       <i class="fa-solid fa-bookmark"></i> 
-      <span>Saved Items (${bookmarks.length})</span>
+      <span>Mahfooz Karda Items (${bookmarks.length})</span>
     </h3>
     <button class="ayah-action-btn back-btn" onclick="goBackFromBookmarks()">
       <i class="fa-solid fa-arrow-left"></i> Back
@@ -166,7 +165,7 @@ function renderBookmarksView() {
     emptyState.style.cssText = 'text-align:center; padding: 40px 15px;';
     emptyState.innerHTML = `
       <i class="fa-regular fa-bookmark" style="font-size: 3rem; color: var(--dark-yellow);"></i>
-      <p style="margin-top: 15px; font-size: 1.1rem;">No surah has been bookmarked.</p>
+      <p style="margin-top: 15px; font-size: 1.1rem;">Koi Ayat ya Surah bookmark nahi ki gayi hai.</p>
     `;
     ayahContainer.appendChild(emptyState);
     return;
@@ -233,15 +232,15 @@ function removeBookmarkDirect(key) {
 // ================= AUTH & PROFILE MANAGEMENT =================
 function checkUserLogin() {
   const user = JSON.parse(localStorage.getItem('currentUser'));
-  
+
   if (user && userNavContainer) {
     userNavContainer.innerHTML = `
-      <button class="profile-nav-btn" id="openProfileBtn" title="${user.email}">
-        <i class="fa-solid fa-circle-user"></i>
-        <span>Profile</span>
+      <button class="profile-nav-btn" id="openProfileBtn">
+        <i class="fas fa-user-circle"></i>
+      <span>Profile</span>
       </button>
     `;
-    
+
     const openProfileBtn = document.getElementById('openProfileBtn');
     if (openProfileBtn) {
       openProfileBtn.onclick = () => {
@@ -255,7 +254,7 @@ function checkUserLogin() {
     userNavContainer.innerHTML = `
       <button class="login-btn" id="openLoginModal"><i class="fa-solid fa-user"></i> Login</button>
     `;
-    
+
     const btn = document.getElementById('openLoginModal');
     if (btn) {
       btn.onclick = () => {
@@ -284,7 +283,7 @@ if (loginForm) {
     const email = emailInput.value;
     const name = email.split('@')[0];
     const userData = { email: email, name: name.charAt(0).toUpperCase() + name.slice(1) };
-    
+
     localStorage.setItem('currentUser', JSON.stringify(userData));
     if (loginModal) loginModal.classList.add('hidden');
     checkUserLogin();
@@ -303,10 +302,12 @@ if (logoutBtn) {
 function updateSearchPlaceholder() {
   if (!searchInput) return;
 
-  if (currentMode === 'urdu') {
+  if (currentMode === 'ai') {
+    searchInput.placeholder = "Ask any Islamic question to get instant AI answers...";
+  } else if (currentMode === 'urdu') {
     searchInput.placeholder = "Search Surah or Ayah to read & listen with Urdu translation...";
   } else {
-    searchInput.placeholder = "Enter Surah name or Ayah number to read & listen with Arabic...";
+    searchInput.placeholder = "Enter Surah name or Ayah number to read & listen Arabic...";
   }
 }
 
@@ -321,7 +322,6 @@ modeButtons.forEach(btn => {
 
 // Refresh / Page Load hone par placeholder set karne ke liye
 updateSearchPlaceholder();
-
 
 // ================= SEARCH TRIGGER =================
 if (searchBtn) searchBtn.addEventListener('click', handleSearch);
@@ -338,10 +338,17 @@ async function handleSearch() {
   if (placeholderText) placeholderText.classList.add('hidden');
   stopAudio();
 
-  if (ayahContainer) {
-    ayahContainer.innerHTML = '<p style="text-align:center; padding: 30px; color: var(--dark-yellow);">⏳ Loading Quran Data...</p>';
+  if (currentMode === 'ai') {
+    if (ayahContainer) {
+      ayahContainer.innerHTML = '<p style="text-align:center; padding: 30px; color: var(--dark-yellow);"> AI is thinking...</p>';
+    }
+    await fetchAIChatbotResponse(query);
+  } else {
+    if (ayahContainer) {
+      ayahContainer.innerHTML = '<p style="text-align:center; padding: 30px; color: var(--dark-yellow);">⏳ Loading Quran Data...</p>';
+    }
+    await fetchQuranData(query);
   }
-  await fetchQuranData(query);
 }
 
 // ================= SURAH & AYAH SEARCH HELPER =================
@@ -361,17 +368,7 @@ const specialAyahAliases = {
   "ayatkursi": { surah: 2, ayah: 255 },
   "ayatal-kursi": { surah: 2, ayah: 255 },
   "ayaturkursi": { surah: 2, ayah: 255 },
-  "amanarrasul": { surah: 2, ayah: 285 },
-  // Ayate Karima (All Variations)
-  "ayatekarima": { surah: 21, ayah: 87 },
-  "ayatekarimah": { surah: 21, ayah: 87 },
-  "ayatalkarima": { surah: 21, ayah: 87 },
-  "ayatal-karima": { surah: 21, ayah: 87 },
-  "ayatkareema": { surah: 21, ayah: 87 },
-  "ayatekareema": { surah: 21, ayah: 87 },
-  "ayatekareemah": { surah: 21, ayah: 87 },
-  "ayatalkareema": { surah: 21, ayah: 87 },
-  "laillahaillaanta": { surah: 21, ayah: 87 }
+  "amanarrasul": { surah: 2, ayah: 285 }
 };
 
 let surahListCache = null;
@@ -379,32 +376,37 @@ let surahListCache = null;
 async function getSurahInfoFromQuery(query) {
   let cleanInput = query.toLowerCase()
     .replace(/\b(surah|sura|soorah|soora)\b/g, '')
-    .replace(/al-|an-|at-|ar-|az-|ash-/g, '') 
-    .replace(/[^a-z0-9:\s]/g, '') 
+    .replace(/al-|an-|at-|ar-|az-|ash-/g, '')
+    .replace(/[^a-z0-9:\s]/g, '')
     .trim();
 
   const normalizedKey = cleanInput.replace(/[^a-z0-9]/g, '');
 
+  // 1. Check for Special Named Ayahs (e.g. "Ayat al Kursi")
   if (specialAyahAliases[normalizedKey]) {
     return specialAyahAliases[normalizedKey];
   }
 
+  // 2. Check for "Surah:Ayah" or "Surah Ayah" format (e.g. "2:255" ya "2 255")
   const ayahPatternMatch = cleanInput.match(/^(\d+)[\s:]+(\d+)$/);
   if (ayahPatternMatch) {
-    return { 
-      surah: parseInt(ayahPatternMatch[1]), 
-      targetAyah: parseInt(ayahPatternMatch[2]) 
+    return {
+      surah: parseInt(ayahPatternMatch[1]),
+      targetAyah: parseInt(ayahPatternMatch[2])
     };
   }
 
+  // 3. Check for Direct Surah Number (1-114)
   if (!isNaN(normalizedKey) && parseInt(normalizedKey) >= 1 && parseInt(normalizedKey) <= 114) {
     return { surah: parseInt(normalizedKey) };
   }
 
+  // 4. Check Popular Surah Names
   if (popularSurahsMap[normalizedKey]) {
     return { surah: popularSurahsMap[normalizedKey] };
   }
 
+  // 5. Check API Surah List Cache
   if (!surahListCache) {
     try {
       const res = await fetch('https://api.alquran.cloud/v1/surah');
@@ -416,90 +418,44 @@ async function getSurahInfoFromQuery(query) {
   if (surahListCache) {
     const found = surahListCache.find(s => {
       const eng = s.englishName.toLowerCase().replace(/[^a-z0-9]/g, '');
-      return eng === normalizedKey || eng.includes(normalizedKey);
+      return eng.includes(normalizedKey) || normalizedKey.includes(eng);
     });
     if (found) return { surah: found.number };
   }
 
-  return null;
+  return { surah: query };
 }
 
 // ================= FETCH QURAN DATA =================
 async function fetchQuranData(query) {
   try {
     const targetInfo = await getSurahInfoFromQuery(query);
+    const surahId = targetInfo.surah;
+    const targetAyah = targetInfo.ayah || targetInfo.targetAyah || null;
 
-    if (targetInfo && targetInfo.surah) {
-      const surahId = targetInfo.surah;
-      const targetAyah = targetInfo.ayah || targetInfo.targetAyah || null;
-      
-      const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahId}/editions/quran-uthmani,ur.jalandhry,ar.alafasy,ur.khan`);
-      const data = await response.json();
-
-      if (data.code === 200) {
-        const arabicData = data.data[0];
-        const urduData = data.data[1];
-        const arabicAudioData = data.data[2];
-        const urduAudioData = data.data[3];
-
-        renderQuranPage(arabicData, urduData, arabicAudioData, urduAudioData, targetAyah);
-        return;
-      }
+    if (typeof surahId === 'string' && isNaN(surahId)) {
+      showSearchError(query);
+      return;
     }
 
-    await searchAyahByText(query);
+    const response = await fetch(`https://api.alquran.cloud/v1/surah/${surahId}/editions/quran-uthmani,ur.jalandhry,ar.alafasy,ur.khan`);
+    const data = await response.json();
+
+    if (data.code !== 200) {
+      showSearchError(query);
+      return;
+    }
+
+    const arabicData = data.data[0];
+    const urduData = data.data[1];
+    const arabicAudioData = data.data[2];
+    const urduAudioData = data.data[3];
+
+    renderQuranPage(arabicData, urduData, arabicAudioData, urduAudioData, targetAyah);
 
   } catch (err) {
     showSearchError(query);
   }
-}
-
-// ================= GLOBAL TEXT SEARCH =================
-async function searchAyahByText(textQuery) {
-  try {
-    const res = await fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(textQuery)}/all/ur.jalandhry`);
-    const data = await res.json();
-
-    if (data.code !== 200 || !data.data || data.data.count === 0) {
-      showSearchError(textQuery);
-      return;
-    }
-
-    renderSearchResults(data.data.matches, textQuery);
-  } catch (err) {
-    showSearchError(textQuery);
-  }
-}
-
-function renderSearchResults(matches, query) {
-  if (!ayahContainer) return;
-  ayahContainer.innerHTML = '';
-  
-  if (masterAudioCard) masterAudioCard.classList.add('hidden');
-  if (currentSurahTitle) {
-    currentSurahTitle.innerText = `Search Results for "${query}" (${matches.length} Ayahs Found)`;
-  }
-
-  matches.forEach((match) => {
-    const card = document.createElement('div');
-    card.className = 'ayah-card';
-
-    card.innerHTML = `
-      <div class="bookmark-badge" style="color: var(--primary-gold, #f1c40f); font-weight: bold;">
-        📌 Surah ${match.surah.englishName} (${match.surah.number}:${match.numberInSurah})
-      </div>
-      <div class="urdu-text" style="font-size: 1.2rem; margin-top: 10px;">
-        ${match.text}
-      </div>
-      <div class="ayah-actions card-actions" style="margin-top: 15px;">
-        <button class="ayah-action-btn" onclick="openBookmarkedSurah(${match.surah.number})">
-          <i class="fa-solid fa-book-open"></i> Go to Surah
-        </button>
-      </div>
-    `;
-
-    ayahContainer.appendChild(card);
-  });
 }
 
 function showSearchError(query) {
@@ -507,7 +463,7 @@ function showSearchError(query) {
   if (ayahContainer) {
     ayahContainer.innerHTML = `
       <div style="text-align:center; padding: 30px 15px;">
-        <p style="color:#ff4d4d; font-size: 1.1rem;">"<b>${query}</b>" not found.<br> <span style="color:#A9A9A9; font-size: 0.9rem;">Check your spellings</span></p>
+        <p style="color:#ff4d4d; font-size: 1.1rem;">"<b>${query}</b>" not found.</p>
       </div>`;
   }
 }
@@ -517,7 +473,7 @@ function renderQuranPage(arabicData, urduData, arabicAudioData, urduAudioData, t
   if (!ayahContainer) return;
   ayahContainer.innerHTML = '';
   currentAyahAudios = [];
-  
+
   if (currentSurahTitle) {
     currentSurahTitle.innerText = `${arabicData.englishName} (${arabicData.name})`;
   }
@@ -584,11 +540,11 @@ function renderQuranPage(arabicData, urduData, arabicAudioData, urduAudioData, t
     const urduAudioUrl = urduAudioData ? urduAudioData.ayahs[index].audio : null;
     const urduText = urduData.ayahs[index].text;
 
-    currentAyahAudios.push({ 
-      arabicAudio: arabicAudioUrl, 
+    currentAyahAudios.push({
+      arabicAudio: arabicAudioUrl,
       urduAudio: urduAudioUrl,
       urduText: urduText,
-      elementId: `ayah-card-${index}` 
+      elementId: `ayah-card-${index}`
     });
 
     let cleanArabicText = ayah.text;
@@ -630,10 +586,88 @@ function renderQuranPage(arabicData, urduData, arabicAudioData, urduAudioData, t
     ayahContainer.appendChild(ayahCard);
   });
 
+  // Target Ayah auto scroll aur highlight logic
   if (targetCardElementId) {
     setTimeout(() => {
       highlightAyahCard(targetCardElementId);
     }, 100);
+  }
+}
+
+// ================= AI CHATBOT MODE =================
+async function fetchAIChatbotResponse(prompt) {
+  if (masterAudioCard) masterAudioCard.classList.add('hidden');
+
+  if (!GROQ_API_KEY) {
+    if (ayahContainer) {
+      ayahContainer.innerHTML = `
+        <div class="ayah-card" style="text-align:left; direction:ltr;">
+          <h3 style="color: #ff4d4d;">⚠️ API Key Missing</h3>
+          <p style="margin-top:10px;">Please add your Groq API Key in <code>script.js</code> at line 8.</p>
+          <p style="margin-top:10px; font-size:0.9rem;">You searched: <strong>"${prompt}"</strong></p>
+        </div>`;
+    }
+    return;
+  }
+
+const strictIslamicSystemPrompt = `
+You are an exclusive Islamic AI Assistant for a Quran application. 
+
+1. LANGUAGE MATCHING RULE:
+   - Detect the language of the user's prompt carefully.
+   - If the user asks in English, reply strictly in English.
+   - If the user asks in Roman Urdu, reply strictly in Roman Urdu using Latin/English alphabets only.
+   - If the user asks in Urdu script, reply in Urdu script.
+
+2. FACTUAL ACCURACY & COMPLETE LISTS RULE:
+   - You MUST ensure 100% historical and factual accuracy.
+   - NEVER truncate, skip, or halluncinate items in lists. For example, if asked for the 12 Imams, you MUST list all 12 sequentially without skipping any name.
+
+3. STRICT ISLAMIC CONTENT RULE:
+   - You MUST ONLY answer questions related to Islam, Quran, Hadith, Sunnah, Islamic History, Prophets, Duas, and Islamic Jurisprudence/Fiqh.
+   - IF THE USER ASKS ABOUT NON-ISLAMIC TOPICS: Decline respectfully in the SAME LANGUAGE as the user's query.
+`;
+
+  try {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${GROQ_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-oss-20b",
+        messages: [
+          { role: "system", content: strictIslamicSystemPrompt },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.2
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.choices && data.choices.length > 0) {
+      const aiReply = data.choices[0].message.content.replace(/\n/g, '<br>');
+      if (ayahContainer) {
+        ayahContainer.innerHTML = `
+          <div class="ayah-card" style="text-align:left; direction:ltr; line-height: 1.8;">
+            <h3 style="color: var(--primary-gold, #f1c40f); margin-bottom: 12px;"> Islamic AI Assistant Response:</h3>
+            <div style="font-size: 1.05rem; color: var(--text-color, #fff);">${aiReply}</div>
+          </div>`;
+      }
+    } else {
+      throw new Error("No response from AI");
+    }
+
+  } catch (error) {
+    console.error("AI Error:", error);
+    if (ayahContainer) {
+      ayahContainer.innerHTML = `
+        <div class="ayah-card" style="text-align:center;">
+          <p style="color: #ff4d4d;">❌ Error generating response. Please check your API key or connection.</p>
+        </div>`;
+    }
   }
 }
 
@@ -652,7 +686,7 @@ function playSingleAyah(index) {
     if (currentMode === 'urdu' && ayahObj.urduAudio) {
       globalAudioPlayer.src = ayahObj.urduAudio;
       globalAudioPlayer.play();
-      
+
       globalAudioPlayer.onended = () => {
         removeHighlights();
       };
@@ -669,10 +703,10 @@ if (masterPlayBtn) {
       return;
     }
     if (currentAyahAudios.length === 0) return;
-    
+
     isPlayingAll = true;
     currentAyahIndex = 0;
-    
+
     masterPlayBtn.innerHTML = `<i class="fa-solid fa-square"></i> Stop`;
     masterPlayBtn.style.background = '#e74c3c';
 
@@ -738,8 +772,8 @@ function stopAudio() {
 if (masterMuteBtn && globalAudioPlayer) {
   masterMuteBtn.addEventListener('click', () => {
     globalAudioPlayer.muted = !globalAudioPlayer.muted;
-    masterMuteBtn.innerHTML = globalAudioPlayer.muted 
-      ? `<i class="fa-solid fa-volume-xmark"></i> Unmute` 
+    masterMuteBtn.innerHTML = globalAudioPlayer.muted
+      ? `<i class="fa-solid fa-volume-xmark"></i> Unmute`
       : `<i class="fa-solid fa-volume-high"></i> Mute`;
   });
 }
@@ -753,8 +787,8 @@ if (voiceSearchBtn) {
     }
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    
-    recognition.lang = 'en-US'; 
+
+    recognition.lang = 'en-US';
     recognition.start();
 
     voiceSearchBtn.style.color = 'red';
