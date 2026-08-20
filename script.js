@@ -598,66 +598,32 @@ function renderQuranPage(arabicData, urduData, arabicAudioData, urduAudioData, t
 async function fetchAIChatbotResponse(prompt) {
   if (masterAudioCard) masterAudioCard.classList.add('hidden');
 
-  if (!GROQ_API_KEY) {
-    if (ayahContainer) {
-      ayahContainer.innerHTML = `
-        <div class="ayah-card" style="text-align:left; direction:ltr;">
-          <h3 style="color: #ff4d4d;">⚠️ API Key Missing</h3>
-          <p style="margin-top:10px;">Please add your Groq API Key in <code>script.js</code> at line 8.</p>
-          <p style="margin-top:10px; font-size:0.9rem;">You searched: <strong>"${prompt}"</strong></p>
-        </div>`;
-    }
-    return;
-  }
-
-const strictIslamicSystemPrompt = `
-You are an exclusive Islamic AI Assistant for a Quran application. 
-
-1. LANGUAGE MATCHING RULE:
-   - Detect the language of the user's prompt carefully.
-   - If the user asks in English, reply strictly in English.
-   - If the user asks in Roman Urdu, reply strictly in Roman Urdu using Latin/English alphabets only.
-   - If the user asks in Urdu script, reply in Urdu script.
-
-2. FACTUAL ACCURACY & COMPLETE LISTS RULE:
-   - You MUST ensure 100% historical and factual accuracy.
-   - NEVER truncate, skip, or halluncinate items in lists. For example, if asked for the 12 Imams, you MUST list all 12 sequentially without skipping any name.
-
-3. STRICT ISLAMIC CONTENT RULE:
-   - You MUST ONLY answer questions related to Islam, Quran, Hadith, Sunnah, Islamic History, Prophets, Duas, and Islamic Jurisprudence/Fiqh.
-   - IF THE USER ASKS ABOUT NON-ISLAMIC TOPICS: Decline respectfully in the SAME LANGUAGE as the user's query.
-`;
-
   try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const response = await fetch("/api/chat", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${GROQ_API_KEY}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        model: "openai/gpt-oss-20b",
-        messages: [
-          { role: "system", content: strictIslamicSystemPrompt },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.2
-      })
+      body: JSON.stringify({ prompt: prompt })
     });
 
     const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to fetch response");
+    }
 
     if (data.choices && data.choices.length > 0) {
       const aiReply = data.choices[0].message.content.replace(/\n/g, '<br>');
       if (ayahContainer) {
         ayahContainer.innerHTML = `
-          <div class="ayah-card" style="text-align:left; direction:ltr; line-height: 1.8;">
+          <div class="ayah-card ai-response-card" style="text-align:left; direction:ltr; line-height: 1.8;">
             <h3 style="color: var(--primary-gold, #f1c40f); margin-bottom: 12px;"> Islamic AI Assistant Response:</h3>
-            <div style="font-size: 1.05rem; color: var(--text-color, #fff);">${aiReply}</div>
+            <div class="ai-response-content" style="font-size: 1.05rem;">${aiReply}</div>
           </div>`;
       }
     } else {
-      throw new Error("No response from AI");
+      throw new Error("No response content from AI");
     }
 
   } catch (error) {
@@ -665,7 +631,7 @@ You are an exclusive Islamic AI Assistant for a Quran application.
     if (ayahContainer) {
       ayahContainer.innerHTML = `
         <div class="ayah-card" style="text-align:center;">
-          <p style="color: #ff4d4d;">❌ Error generating response. Please check your API key or connection.</p>
+          <p style="color: #ff4d4d;">❌ Error generating response. Please try again later.</p>
         </div>`;
     }
   }
